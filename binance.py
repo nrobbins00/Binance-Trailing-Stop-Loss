@@ -3,7 +3,7 @@ import ccxt
 class Binance():
 
     def __init__(self, api_key, api_secret):
-        self.ccxtClient = ccxt.binance({
+        self.ccxtClient = ccxt.binanceus({
             'apiKey': api_key,
             'secret': api_secret,
         })

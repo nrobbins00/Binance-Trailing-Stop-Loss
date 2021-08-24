@@ -2,6 +2,7 @@ import ccxt
 from binance import Binance
 import config
 import time
+from slackerizer import slackhook
 
 # PLEASE CONFIGURE API DETAILS IN config.py
 
@@ -12,6 +13,7 @@ class StopTrail():
             api_key=config.API_DETAILS['API_KEY'],
             api_secret=config.API_DETAILS['API_SECRET']
         )
+        self.slack_webhook = config.API_DETAILS['webhook']
         self.market = market
         self.type = type
         self.stopsize = stopsize
@@ -22,6 +24,8 @@ class StopTrail():
     def initialize_stop(self):
         if self.type == "buy":
             return (self.binance.get_price(self.market) + self.stopsize)
+        elif self.type == "sell_percent":
+            return (self.binance.get_price(self.market) * ((100 - self.stopsize) / 100))
         else:
             return (self.binance.get_price(self.market) - self.stopsize)
 
@@ -36,6 +40,18 @@ class StopTrail():
                 amount = self.binance.get_balance(self.market.split("/")[0])
                 price = self.binance.get_price(self.market)
                 self.binance.sell(self.market, amount, price)
+                slackhook(f"Sell triggered | Market price: {price:.8f} | Stop Loss price: {self.stoploss:.8f}", self.slack_webhook)
+                print("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
+        elif self.type == "sell_percent":
+            if (price * ((100 - self.stopsize) / 100)) > self.stoploss:
+                self.stoploss = price * ((100 - self.stopsize) / 100)
+                print("New high observed: Updating stop loss to %.8f" % self.stoploss)
+            elif price <= self.stoploss:
+                self.running = False
+                amount = self.binance.get_balance(self.market.split("/")[0])
+                price = self.binance.get_price(self.market)
+                self.binance.sell(self.market, amount, price)
+                slackhook(f"Sell triggered | Market price: {price:.8f} | Stop Loss price: {self.stoploss:.8f}", self.slack_webhook)
                 print("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
         elif self.type == "buy":
             if (price + self.stopsize) < self.stoploss:
@@ -47,6 +63,19 @@ class StopTrail():
                 price = self.binance.get_price(self.market)
                 amount = (balance / price) * 0.999 # 0.10% maker/taker fee without BNB
                 self.binance.buy(self.market, amount, price)
+                slackhook(f"Buy triggered | Market price: {price:.8f} | Stop Loss price: {self.stoploss:.8f}", self.slack_webhook)
+                print("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
+        elif self.type == "buy_percent":
+            if (price * ((100 + self.stopsize) / 100)) < self.stoploss:
+                self.stoploss = price * ((100 + self.stopsize) / 100)
+                print("New low observed: Updating stop loss to %.8f" % self.stoploss)
+            elif price >= self.stoploss:
+                self.running = False
+                balance = self.binance.get_balance(self.market.split("/")[1])
+                price = self.binance.get_price(self.market)
+                amount = (balance / price) * 0.999 # 0.10% maker/taker fee without BNB
+                self.binance.buy(self.market, amount, price)
+                slackhook(f"Buy triggered | Market price: {price:.8f} | Stop Loss price: {self.stoploss:.8f}", self.slack_webhook)
                 print("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
 
     def print_status(self):
@@ -56,7 +85,10 @@ class StopTrail():
         print("Market: %s" % self.market)
         print("Stop loss: %.8f" % self.stoploss)
         print("Last price: %.8f" % last)
-        print("Stop size: %.8f" % self.stopsize)
+        if self.type == "sell_percent" or "buy_percent":
+            print("Stop size percent: %.8f" % self.stopsize)
+        else:            
+            print("Stop size: %.8f" % self.stopsize)
         print("---------------------")
 
     def run(self):

@@ -1,9 +1,11 @@
 from trail import StopTrail
 import argparse
+import json
+import requests
 
 def main(options):
 
-    if options.type not in ['buy', 'sell']:
+    if options.type not in ['buy', 'sell', 'sell_percent']:
         print("Error: Please use valid trail type (Ex: 'buy' or 'sell')")
         return
 
