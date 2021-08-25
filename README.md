@@ -59,9 +59,17 @@ If you are running in sell mode, it is assumed that you have already purchased t
 
 If the **buy** option is set, the bot will initially place a stop-loss `size` satoshis (or USD) **above** the current market price. As the price goes lower, the stop-loss will get dragged with it, staying no higher than the size specified. Once the price crosses the stop-loss price, a buy order is executed.
 
+**Buy percent mode**
+
+If the **buy_percent** option is set, the bot will initially place a stop-loss `size` in percentage points **above** the current market price. As the price goes lower, the stop-loss will get dragged with it, staying no higher than the size specified. Once the price crosses the stop-loss price, a buy order is executed.
+
 **Sell mode**
 
 If the **sell** option is set, the bot will initially place a stop-loss `size` satoshis (or USD) **below** the current market price. As the price goes higher, the stop-loss will get dragged with it, staying no lower than the size specified. Once the price crosses the stop-loss price, a sell order is executed.
+
+**Sell percent mode**
+
+If the **sell_percent** option is set, the bot will initially place a stop-loss `size` in percentage points **below** the current market price. As the price goes higher, the stop-loss will get dragged with it, staying no lower than the size specified. Once the price crosses the stop-loss price, a sell order is executed.
 
 **Size**
 
