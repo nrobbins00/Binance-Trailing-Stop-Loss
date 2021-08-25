@@ -67,7 +67,15 @@ If the **sell** option is set, the bot will initially place a stop-loss `size` s
 
 This is the amount in satoshis (or USD) you would like the stop-loss to be retained at. The difference between the current price and stop-loss will never be larger than this amount.
 
+## Running as docker
+docker build . -t <tagname>
+docker run -itd <tagname> <args>
 
+example:
+docker run -itd mydockerbot --symbol ADA/USDT --size 5 --type sell_percent
 
 ## License
 Released under GPLv3.
+
+
+
