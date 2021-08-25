@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from trail import StopTrail
 import argparse
 import json
