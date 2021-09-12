@@ -82,7 +82,7 @@ class StopTrail():
                 balance = self.binance.get_balance(self.market.split("/")[1])
                 price = self.binance.get_price(self.market)
                 amount = (balance / price) * 0.99925 # 0.10% maker/taker fee without BNB, 0.075% with BNB
-                #self.binance.buy(self.market, amount, price)
+                self.binance.buy(self.market, amount, price)
                 slackhook(f"<@{self.slack_username}> Buy triggered | Market price: {price:.8f} | Stop Loss price: {self.stoploss:.8f}", self.slack_webhook)
                 print("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
 
